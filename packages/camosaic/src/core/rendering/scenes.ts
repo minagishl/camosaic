@@ -75,12 +75,18 @@ const plasmaLut = Array.from({ length: 256 }, (_, index) =>
   hslToRgb(185 + 65 * index / 255, 0.85, 0.1 + 0.55 * index / 255),
 );
 
-function placeMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sourceW: number, sourceH: number, stageW: number, stageH: number, layout: MediaLayout): void {
+/** Where an image or video of the given size lands on the stage for a layout. */
+export function mediaRect(sourceW: number, sourceH: number, stageW: number, stageH: number, layout: MediaLayout): { x: number; y: number; w: number; h: number } {
   const fit = layout.fit === "contain" ? Math.min(stageW / sourceW, stageH / sourceH) : Math.max(stageW / sourceW, stageH / sourceH);
-  const drawW = sourceW * fit * layout.scale, drawH = sourceH * fit * layout.scale;
+  const w = sourceW * fit * layout.scale, h = sourceH * fit * layout.scale;
   const cx = stageW / 2 + layout.x * stageW / 2, cy = stageH / 2 + layout.y * stageH / 2;
+  return { x: cx - w / 2, y: cy - h / 2, w, h };
+}
+
+function placeMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sourceW: number, sourceH: number, stageW: number, stageH: number, layout: MediaLayout): void {
+  const rect = mediaRect(sourceW, sourceH, stageW, stageH, layout);
   ctx.fillStyle = "#000"; ctx.fillRect(0, 0, stageW, stageH);
-  ctx.drawImage(source, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
+  ctx.drawImage(source, rect.x, rect.y, rect.w, rect.h);
 }
 
 function centerText(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, size = 48): void {

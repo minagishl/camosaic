@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyPose, createChild, createHost, detectTags, drawTag, encodeSignal, invertPose, markerGeom, parseTagId,
-  poseFrom, tagBits, tagId, DEFAULT_MEDIA_LAYOUT,
+  poseFrom, tagBits, tagId, DEFAULT_MEDIA_LAYOUT, mediaRect,
 } from "../src/core";
 import { attachDataChannel } from "../src/core/transport/chunks";
 import { deserializeMessage, serializeMessage } from "../src/core/transport/messages";
@@ -160,6 +160,20 @@ describe("media layout", () => {
     host.setLayout({ scale: 0 });
     expect(host.scene.layout.scale).toBe(0.1);
     host.dispose();
+  });
+
+  it("computes where media lands on the stage", () => {
+    const layout = DEFAULT_MEDIA_LAYOUT;
+    // A 2:1 image on a 16:9 stage: cover fills the height and overflows the width, contain fills the width.
+    const cover = mediaRect(200, 100, 1280, 720, layout);
+    expect(cover.h).toBeCloseTo(720);
+    expect(cover.x + cover.w / 2).toBeCloseTo(640);
+    const contain = mediaRect(200, 100, 1280, 720, { ...layout, fit: "contain" });
+    expect(contain.w).toBeCloseTo(1280);
+    expect(contain.h).toBeCloseTo(640);
+    const moved = mediaRect(200, 100, 1280, 720, { fit: "contain", scale: 0.5, x: 1, y: -1 });
+    expect(moved.x + moved.w / 2).toBeCloseTo(1280);
+    expect(moved.y + moved.h / 2).toBeCloseTo(0);
   });
 
   it("validates layout messages", () => {
