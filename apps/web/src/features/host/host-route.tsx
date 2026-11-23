@@ -8,6 +8,7 @@ import {
   Badge, Button, DeviceSwatch, ImagePicker, Disclosure, Field, IconButton, Input, Muted, Panel, SceneGrid, Section, Select, Slider, Switch, Textarea, Workspace, buttonClass, stageClass,
 } from "../../components/ui";
 import { useUiStore } from "../../stores/ui-store";
+import { MediaLayoutControls } from "../../components/media-layout";
 import { joinQr } from "../../lib/qr";
 import { useHostPairing } from "../../lib/pairing";
 
@@ -215,6 +216,7 @@ export function HostRoute() {
       <Section title="Scene">
         <SceneGrid scenes={scenes} selected={host.scene.scene} onSelect={setScene} />
         {host.scene.scene === "image" && <ImagePicker onFile={(file) => void chooseImage(file)} />}
+        {(host.scene.scene === "image" || host.scene.scene === "video") && <MediaLayoutControls layout={host.scene.layout} onChange={(patch) => host.setLayout(patch)} />}
         {host.scene.scene === "video" && <div className="flex min-w-0 items-center gap-2">
           <Input aria-label="Video URL" type="url" placeholder="https://example.com/video.mp4" value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)} />
           <Button onClick={() => { host.setScene({ scene: "video", videoUrl: videoUrl.trim() }); }}><IconVideo size={14} stroke={1.75} /> Apply</Button>

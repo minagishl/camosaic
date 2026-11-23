@@ -4,6 +4,7 @@ import { MARKER_HUES, type SceneType } from "camosaic";
 import {
   Button, DeviceSwatch, Disclosure, ImagePicker, IconButton, Input, Panel, Readout, SceneGrid, Section, Slider, Switch, Workspace, stageClass,
 } from "../../components/ui";
+import { MediaLayoutControls } from "../../components/media-layout";
 import { TestLabModel, type SelfTestResult, type VirtualDevice } from "./test-lab-model";
 
 const scenes: Array<{ id: SceneType; label: string }> = [
@@ -177,6 +178,7 @@ export function LabRoute() {
         <Section title="Scene">
           <SceneGrid scenes={scenes} selected={lab?.host.scene.scene} onSelect={sceneChange} />
           {lab?.host.scene.scene === "image" && <ImagePicker onFile={(file) => void addImage(file)} />}
+          {lab && (lab.host.scene.scene === "image" || lab.host.scene.scene === "video") && <MediaLayoutControls layout={lab.host.scene.layout} onChange={(patch) => lab.host.setLayout(patch)} />}
           {lab?.host.scene.scene === "video" && <div className="flex min-w-0 items-center gap-2">
             <Input type="url" aria-label="Video URL" placeholder="https://example.com/video.mp4" value={sceneVideoUrl} onChange={(event) => setSceneVideoUrl(event.target.value)} />
             <Button onClick={() => lab.host.setScene({ scene: "video", videoUrl: sceneVideoUrl.trim() })}>Apply</Button>
