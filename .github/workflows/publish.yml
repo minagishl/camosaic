@@ -1,0 +1,70 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/camosaic
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      # Trusted publishing needs npm >= 11.5.1
+      - name: Upgrade npm
+        working-directory: .
+        run: npm install -g npm@latest && npm --version
+
+      - name: Install dependencies
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify tag matches package version
+        working-directory: .
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./packages/camosaic/package.json').version")"
+          if [ "$TAG" != "$PKG_VERSION" ]; then
+            echo "Tag v$TAG does not match package version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Typecheck and test
+        working-directory: .
+        run: pnpm typecheck && pnpm test
+
+      - name: Build package
+        working-directory: .
+        run: pnpm build:lib
+
+      - name: Publish to npm (OIDC trusted publishing)
+        run: npm publish --access public --provenance
+
+      - name: Create GitHub Release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag
