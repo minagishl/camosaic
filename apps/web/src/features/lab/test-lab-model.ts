@@ -203,18 +203,14 @@ export class TestLabModel {
   }
 
   randomize(): void {
-    const placed: VirtualDevice[] = [];
-    for (const device of this.devices) {
-      let attempts = 0;
-      do {
-        device.x = 280 + Math.random() * 720;
-        device.y = 300 + Math.random() * 120;
-        attempts++;
-      } while (attempts < 300 && placed.some((item) => Math.hypot(item.x - device.x, item.y - device.y) < 560));
+    // One lane per device across the frame, so displays never overlap each other.
+    const count = this.devices.length;
+    this.devices.forEach((device, index) => {
+      device.x = (1280 * (index + 0.5)) / count + (Math.random() - 0.5) * 60;
+      device.y = 310 + Math.random() * 100;
       device.rotation = Math.random() * Math.PI * 2;
       device.scale = 0.7 + Math.random() * 0.25;
-      placed.push(device);
-    }
+    });
   }
 
   selfTest(trials: number): SelfTestResult {
