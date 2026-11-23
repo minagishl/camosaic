@@ -216,7 +216,7 @@ export function HostRoute() {
       <Section title="Scene">
         <SceneGrid scenes={scenes} selected={host.scene.scene} onSelect={setScene} />
         {host.scene.scene === "image" && <ImagePicker onFile={(file) => void chooseImage(file)} />}
-        {(host.scene.scene === "image" || host.scene.scene === "video") && <MediaLayoutControls layout={host.scene.layout} onChange={(patch) => host.setLayout(patch)} />}
+        {(host.scene.scene === "image" || host.scene.scene === "video") && <MediaLayoutControls layout={host.scene.layout} scene={host.scene} stage={host.stage} getDevices={() => [...host.peers.values()]} onChange={(patch) => host.setLayout(patch)} />}
         {host.scene.scene === "video" && <div className="flex min-w-0 items-center gap-2">
           <Input aria-label="Video URL" type="url" placeholder="https://example.com/video.mp4" value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)} />
           <Button onClick={() => { host.setScene({ scene: "video", videoUrl: videoUrl.trim() }); }}><IconVideo size={14} stroke={1.75} /> Apply</Button>

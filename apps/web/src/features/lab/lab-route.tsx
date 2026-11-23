@@ -62,6 +62,11 @@ export function LabRoute() {
     }
     modelRef.current = lab;
     lab.onchange = () => setRevision((value) => value + 1);
+    // Re-render when the host changes (scene, layout, peers), but at most a few times a second.
+    let refresh = 0;
+    const stopListening = lab.host.on(() => {
+      if (!refresh) refresh = window.setTimeout(() => { refresh = 0; setRevision((value) => value + 1); }, 250);
+    });
     setReady(true);
     let raf = 0;
     let lastReadout = 0;
@@ -83,6 +88,8 @@ export function LabRoute() {
     raf = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(refresh);
+      stopListening();
       lab.dispose();
       modelRef.current = null;
     };
@@ -178,7 +185,7 @@ export function LabRoute() {
         <Section title="Scene">
           <SceneGrid scenes={scenes} selected={lab?.host.scene.scene} onSelect={sceneChange} />
           {lab?.host.scene.scene === "image" && <ImagePicker onFile={(file) => void addImage(file)} />}
-          {lab && (lab.host.scene.scene === "image" || lab.host.scene.scene === "video") && <MediaLayoutControls layout={lab.host.scene.layout} onChange={(patch) => lab.host.setLayout(patch)} />}
+          {lab && (lab.host.scene.scene === "image" || lab.host.scene.scene === "video") && <MediaLayoutControls layout={lab.host.scene.layout} scene={lab.host.scene} stage={lab.host.stage} getDevices={() => [...lab.host.peers.values()]} onChange={(patch) => lab.host.setLayout(patch)} />}
           {lab?.host.scene.scene === "video" && <div className="flex min-w-0 items-center gap-2">
             <Input type="url" aria-label="Video URL" placeholder="https://example.com/video.mp4" value={sceneVideoUrl} onChange={(event) => setSceneVideoUrl(event.target.value)} />
             <Button onClick={() => lab.host.setScene({ scene: "video", videoUrl: sceneVideoUrl.trim() })}>Apply</Button>
