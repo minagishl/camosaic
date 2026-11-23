@@ -4,11 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#18181b" />
-    <meta name="description" content="Turn multiple screens into one canvas with camera-based tracking." />
-    <title>Camosaic — One shared canvas</title>
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="Camosaic" />
+    <title>Camosaic — One canvas across many screens</title>
+    <meta
+      name="description"
+      content="Turn phones, tablets and monitors into one shared canvas. A camera tracks AprilTags on each screen and sends every display the matching part of the scene. Runs entirely in your browser."
+    />
+    <link rel="canonical" href="https://camosaic.dev/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="keywords" content="multi-screen, shared canvas, AprilTag, WebRTC, camera tracking, video wall" />
+
+    <meta property="og:url" content="https://camosaic.dev/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Camosaic" />
+    <meta property="og:title" content="Camosaic — One canvas across many screens" />
+    <meta
+      property="og:description"
+      content="Use a camera to find every screen, then show one synchronized scene across all of them. No install, no account."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Camosaic — One canvas across many screens" />
+    <meta
+      name="twitter:description"
+      content="Use a camera to find every screen, then show one synchronized scene across all of them."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Camosaic",
+        "url": "https://camosaic.dev/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any (web browser)",
+        "description": "Turn multiple screens into one shared canvas with camera-based AprilTag tracking.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "sameAs": "https://github.com/minagishl/camosaic"
+      }
+    </script>
   </head>
   <body class="bg-zinc-900 scheme-dark">
     <div id="root"></div>
+    <noscript>
+      <h1>Camosaic</h1>
+      <p>Camosaic turns multiple screens into one shared canvas using camera tracking. Please enable JavaScript to use it.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
