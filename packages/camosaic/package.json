@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Camera-based shared canvas tracking for multiple physical screens",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minagishl/camosaic.git",
+    "directory": "packages/camosaic"
+  },
+  "homepage": "https://github.com/minagishl/camosaic#readme",
+  "bugs": "https://github.com/minagishl/camosaic/issues",
   "type": "module",
   "sideEffects": false,
   "files": [
