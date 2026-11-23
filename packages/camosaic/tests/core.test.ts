@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyPose, createChild, createHost, detectTags, drawTag, encodeSignal, invertPose, markerGeom, parseTagId,
-  poseFrom, tagBits, tagId,
+  poseFrom, tagBits, tagId, DEFAULT_MEDIA_LAYOUT,
 } from "../src/core";
 import { attachDataChannel } from "../src/core/transport/chunks";
 import { deserializeMessage, serializeMessage } from "../src/core/transport/messages";
@@ -146,9 +146,33 @@ describe("hidden tags", () => {
   });
 });
 
+describe("media layout", () => {
+  it("clamps layout changes, keeps the video epoch and tells every child", () => {
+    const host = createHost();
+    const sent: WireMessage[] = [];
+    host.addPeer({ kind: "local", send: (message) => sent.push(message) }, { w: 300, h: 520 });
+    const epoch = host.scene.epoch;
+    sent.length = 0;
+    host.setLayout({ scale: 99, x: -5, y: 0.25, fit: "contain" });
+    expect(host.scene.layout).toEqual({ fit: "contain", scale: 4, x: -1, y: 0.25 });
+    expect(host.scene.epoch).toBe(epoch);
+    expect(sent).toEqual([{ t: "layout", layout: host.scene.layout }]);
+    host.setLayout({ scale: 0 });
+    expect(host.scene.layout.scale).toBe(0.1);
+    host.dispose();
+  });
+
+  it("validates layout messages", () => {
+    const layout = { fit: "cover", scale: 1.5, x: 0.2, y: -0.2 } as const;
+    expect(deserializeMessage(serializeMessage({ t: "layout", layout }))).toEqual({ t: "layout", layout });
+    expect(() => deserializeMessage('{"t":"layout","layout":{"fit":"zoom","scale":1,"x":0,"y":0}}')).toThrow();
+    expect(() => deserializeMessage('{"t":"layout","layout":{"fit":"cover","scale":-1,"x":0,"y":0}}')).toThrow();
+  });
+});
+
 describe("communication and clock synchronization", () => {
   it("validates message serialization", () => {
-    const message: WireMessage = { t: "scene", scene: "grid", videoUrl: "", image: null, epoch: 100 };
+    const message: WireMessage = { t: "scene", scene: "grid", videoUrl: "", image: null, epoch: 100, layout: DEFAULT_MEDIA_LAYOUT };
     expect(deserializeMessage(serializeMessage(message))).toEqual(message);
     expect(() => deserializeMessage('{"t":"pose","m":[1],"now":0}')).toThrow();
   });
@@ -161,12 +185,12 @@ describe("communication and clock synchronization", () => {
     const image = "x".repeat(25000);
     let reconstructed: WireMessage | undefined;
     receive.onmessage = (message) => { reconstructed = message; };
-    send.send({ t: "scene", scene: "image", videoUrl: "", image, epoch: 123 });
+    send.send({ t: "scene", scene: "image", videoUrl: "", image, epoch: 123, layout: DEFAULT_MEDIA_LAYOUT });
     expect((sender as unknown as FakeDataChannel).sent.length).toBeGreaterThan(1);
     for (const part of (sender as unknown as FakeDataChannel).sent) {
       receiver.dispatchEvent(new MessageEvent("message", { data: part }));
     }
-    expect(reconstructed).toEqual({ t: "scene", scene: "image", videoUrl: "", image, epoch: 123 });
+    expect(reconstructed).toEqual({ t: "scene", scene: "image", videoUrl: "", image, epoch: 123, layout: DEFAULT_MEDIA_LAYOUT });
   });
 
   it("estimates the host clock from received messages", () => {

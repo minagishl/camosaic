@@ -50,6 +50,7 @@ export class CamosaicChild {
         break;
       case "scene": this.view.apply(message); break;
       case "stage": this.stage = message.stage; break;
+      case "layout": this.view.layout = message.layout; break;
       case "pose": this.setClock(message.now); this.inverse = message.m ? invertPose(message.m) : null; this.poseAt = performance.now(); break;
     }
   }

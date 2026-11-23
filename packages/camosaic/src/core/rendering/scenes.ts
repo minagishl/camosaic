@@ -1,4 +1,5 @@
-import type { SceneState, SceneType } from "../types";
+import { DEFAULT_MEDIA_LAYOUT } from "../types";
+import type { MediaLayout, SceneState, SceneType } from "../types";
 
 export class SceneView {
   scene: SceneType = "grid";
@@ -7,11 +8,13 @@ export class SceneView {
   private imageKey: string | null = null;
   video: HTMLVideoElement | null = null;
   videoUrl = "";
+  layout: MediaLayout = { ...DEFAULT_MEDIA_LAYOUT };
   private lastSync = 0;
 
   apply(state: SceneState): void {
     this.scene = state.scene;
     this.epoch = state.epoch;
+    this.layout = state.layout ?? { ...DEFAULT_MEDIA_LAYOUT };
     if (state.image && state.image !== this.imageKey) {
       this.imageKey = state.image;
       const image = new Image();
@@ -72,10 +75,12 @@ const plasmaLut = Array.from({ length: 256 }, (_, index) =>
   hslToRgb(185 + 65 * index / 255, 0.85, 0.1 + 0.55 * index / 255),
 );
 
-function cover(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sourceW: number, sourceH: number, stageW: number, stageH: number): void {
-  const scale = Math.max(stageW / sourceW, stageH / sourceH);
-  const drawW = sourceW * scale, drawH = sourceH * scale;
-  ctx.drawImage(source, (stageW - drawW) / 2, (stageH - drawH) / 2, drawW, drawH);
+function placeMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sourceW: number, sourceH: number, stageW: number, stageH: number, layout: MediaLayout): void {
+  const fit = layout.fit === "contain" ? Math.min(stageW / sourceW, stageH / sourceH) : Math.max(stageW / sourceW, stageH / sourceH);
+  const drawW = sourceW * fit * layout.scale, drawH = sourceH * fit * layout.scale;
+  const cx = stageW / 2 + layout.x * stageW / 2, cy = stageH / 2 + layout.y * stageH / 2;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, stageW, stageH);
+  ctx.drawImage(source, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
 }
 
 function centerText(ctx: CanvasRenderingContext2D, text: string, w: number, h: number, size = 48): void {
@@ -153,11 +158,11 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, v
     case "plasma": drawPlasma(ctx, w, h, time, plasmaBuffer); break;
     case "clock": drawClock(ctx, w, h, time); break;
     case "image":
-      if (view.image?.complete && view.image.naturalWidth) cover(ctx, view.image, view.image.naturalWidth, view.image.naturalHeight, w, h);
+      if (view.image?.complete && view.image.naturalWidth) placeMedia(ctx, view.image, view.image.naturalWidth, view.image.naturalHeight, w, h, view.layout);
       else centerText(ctx, "No image selected", w, h);
       break;
     case "video":
-      if (view.video && view.video.readyState >= 2 && view.video.videoWidth) cover(ctx, view.video, view.video.videoWidth, view.video.videoHeight, w, h);
+      if (view.video && view.video.readyState >= 2 && view.video.videoWidth) placeMedia(ctx, view.video, view.video.videoWidth, view.video.videoHeight, w, h, view.layout);
       else centerText(ctx, view.videoUrl ? "Loading video" : "Video URL is not set", w, h);
       break;
   }

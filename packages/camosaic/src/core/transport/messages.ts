@@ -14,10 +14,20 @@ export function isWireMessage(value: unknown): value is WireMessage {
     case "stage": return validSize(msg.stage);
     case "scene": return ["grid", "gradient", "plasma", "clock", "image", "video"].includes(String(msg.scene)) &&
       typeof msg.videoUrl === "string" && msg.videoUrl.length <= 4096 &&
-      (msg.image === null || (typeof msg.image === "string" && msg.image.length <= 8_000_000)) && Number.isFinite(msg.epoch);
+      (msg.image === null || (typeof msg.image === "string" && msg.image.length <= 8_000_000)) && Number.isFinite(msg.epoch) &&
+      validLayout(msg.layout);
+    case "layout": return validLayout(msg.layout);
     case "pose": return (msg.m === null || validPose(msg.m)) && Number.isFinite(msg.now);
     default: return false;
   }
+}
+
+function validLayout(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const layout = value as Record<string, unknown>;
+  return (layout.fit === "cover" || layout.fit === "contain") &&
+    Number.isFinite(layout.scale) && Number(layout.scale) >= 0.01 && Number(layout.scale) <= 20 &&
+    Number.isFinite(layout.x) && Math.abs(Number(layout.x)) <= 5 && Number.isFinite(layout.y) && Math.abs(Number(layout.y)) <= 5;
 }
 
 function validSize(value: unknown): boolean {

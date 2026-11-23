@@ -32,7 +32,7 @@ host.heartbeat();
 
 `detectTags(frame)` accepts `ImageData`-compatible data and returns every Camosaic AprilTag it finds, each with its display slot, corner (0 = top-left, 1 = top-right, 2 = bottom-right) and center. Tag ids 0-14 encode `slot * 3 + corner`, so displays are identified by the tag itself, not by color. Defaults are smoothing `0.6`, a `500ms` loss hold, and `keepPose: false`; set `host.options.keepPose = true` to keep showing a display's last known position after tracking is lost. A host assigns up to five slots.
 
-`createHost()` exposes the stage, peers, scene, and mutable `options` object. `track(frame, now?)` returns the detected tags and updates poses (pass `{ mirror: true }` when the preview is mirrored). Call `dispose()` when finished. Affine helpers use `[a, b, c, d, e, f]` canvas-transform order for inverse poses.
+`createHost()` exposes the stage, peers, scene, and mutable `options` object. `track(frame, now?)` returns the detected tags and updates poses (pass `{ mirror: true }` when the preview is mirrored). `setLayout({ fit, scale, x, y })` resizes and moves the shared image or video (`fit` is `cover` or `contain`, `scale` 0.1-4, `x`/`y` from -1 to 1) without restarting video sync. Call `dispose()` when finished. Affine helpers use `[a, b, c, d, e, f]` canvas-transform order for inverse poses.
 
 ## React integration
 

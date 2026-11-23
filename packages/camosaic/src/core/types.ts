@@ -10,11 +10,25 @@ export interface Size {
 
 export type Pose = [number, number, number, number, number, number];
 export type SceneType = "grid" | "gradient" | "plasma" | "clock" | "image" | "video";
+/** How an image or video is placed on the shared stage. */
+export interface MediaLayout {
+  /** `cover` fills the stage (cropping), `contain` shows the whole media. */
+  fit: "cover" | "contain";
+  /** Zoom on top of the fit, 1 = as fitted. */
+  scale: number;
+  /** Center offset as a fraction of half the stage (-1 = left/top edge, 1 = right/bottom edge). */
+  x: number;
+  y: number;
+}
+export const DEFAULT_MEDIA_LAYOUT: MediaLayout = { fit: "cover", scale: 1, x: 0, y: 0 };
+export const MEDIA_SCALE_RANGE = [0.1, 4] as const;
+
 export interface SceneState {
   scene: SceneType;
   videoUrl: string;
   image: string | null;
   epoch: number;
+  layout: MediaLayout;
 }
 export interface TrackingOptions {
   smooth: number;
@@ -57,7 +71,8 @@ export type WireMessage =
   | { t: "markers"; visible: boolean }
   | { t: "hello"; slot: number; hue: number; stage: Size; now: number }
   | { t: "stage"; stage: Size }
-  | { t: "scene"; scene: SceneType; videoUrl: string; image: string | null; epoch: number }
+  | { t: "scene"; scene: SceneType; videoUrl: string; image: string | null; epoch: number; layout: MediaLayout }
+  | { t: "layout"; layout: MediaLayout }
   | { t: "pose"; m: Pose | null; now: number };
 export interface ImageFrame {
   data: Uint8ClampedArray;

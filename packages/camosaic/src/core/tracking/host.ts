@@ -1,12 +1,12 @@
 import { applyPose, lerpPose, poseFrom } from "../geometry/affine";
 import { detectTags } from "../vision/apriltag";
-import { DEFAULT_TRACKING_OPTIONS, DETECT_WIDTH, MARKER_HUES, MAX_PEERS, markerGeom, STAGE_WIDTH } from "../types";
-import type { ImageFrame, Link, Peer, Pose, TagHit, SceneState, Size, TrackingOptions, WireMessage } from "../types";
+import { DEFAULT_MEDIA_LAYOUT, DEFAULT_TRACKING_OPTIONS, MEDIA_SCALE_RANGE, DETECT_WIDTH, MARKER_HUES, MAX_PEERS, markerGeom, STAGE_WIDTH } from "../types";
+import type { ImageFrame, Link, MediaLayout, Peer, Pose, TagHit, SceneState, Size, TrackingOptions, WireMessage } from "../types";
 
 export class CamosaicHost {
   readonly peers = new Map<number, Peer>();
   stage: Size = { w: STAGE_WIDTH, h: Math.round(STAGE_WIDTH * 9 / 16) };
-  scene: SceneState = { scene: "grid", videoUrl: "", image: null, epoch: Date.now() };
+  scene: SceneState = { scene: "grid", videoUrl: "", image: null, epoch: Date.now(), layout: { ...DEFAULT_MEDIA_LAYOUT } };
   readonly options: TrackingOptions = { ...DEFAULT_TRACKING_OPTIONS };
   private listeners = new Set<() => void>();
 
@@ -80,6 +80,23 @@ export class CamosaicHost {
   setScene(patch: Partial<SceneState>): void {
     this.scene = { ...this.scene, ...patch, epoch: Date.now() };
     for (const peer of this.peers.values()) this.send(peer, this.sceneMessage());
+    this.emit();
+  }
+
+  /** Moves or resizes the image/video on every display. Unlike `setScene` it does not restart video sync. */
+  setLayout(patch: Partial<MediaLayout>): void {
+    const next = { ...this.scene.layout, ...patch };
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, Number.isFinite(value) ? value : 0));
+    this.scene = {
+      ...this.scene,
+      layout: {
+        fit: next.fit === "contain" ? "contain" : "cover",
+        scale: clamp(next.scale, MEDIA_SCALE_RANGE[0], MEDIA_SCALE_RANGE[1]),
+        x: clamp(next.x, -1, 1),
+        y: clamp(next.y, -1, 1),
+      },
+    };
+    for (const peer of this.peers.values()) this.send(peer, { t: "layout", layout: this.scene.layout });
     this.emit();
   }
 
