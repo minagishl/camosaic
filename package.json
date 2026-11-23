@@ -1,0 +1,18 @@
+{
+  "name": "camosaic-workspace",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "pnpm build:lib && pnpm --filter camosaic-web dev",
+    "build": "pnpm build:lib && pnpm --filter camosaic-web build",
+    "build:lib": "pnpm --filter camosaic build",
+    "typecheck": "pnpm build:lib && pnpm -r typecheck",
+    "test": "pnpm build:lib && pnpm -r test",
+    "test:e2e": "pnpm build:lib && pnpm --filter camosaic-web test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
