@@ -74,5 +74,5 @@ export const DEFAULT_TRACKING_OPTIONS: TrackingOptions = {
 /** Marker box size and the distance from the screen edge to each marker center. */
 export const markerGeom = (w: number, h: number) => {
   const m = Math.min(w, h);
-  return { size: m * 0.34, c: m * 0.2 };
+  return { size: m * 0.4, c: m * 0.24 };
 };

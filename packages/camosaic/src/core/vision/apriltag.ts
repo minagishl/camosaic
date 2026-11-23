@@ -1,6 +1,6 @@
 import aruco from "js-aruco2/src/aruco.js";
 import * as cvModule from "js-aruco2/src/cv.js";
-import { MAX_PEERS } from "../types";
+import { MAX_PEERS, markerGeom } from "../types";
 import type { ImageFrame, TagHit } from "../types";
 
 const { AR } = aruco;
@@ -67,8 +67,7 @@ export function drawTag(ctx: Canvas2D, id: number, cx: number, cy: number, size:
 
 /** Draws the three corner tags of a display. */
 export function drawMarkers(ctx: Canvas2D, slot: number, width: number, height: number): void {
-  const m = Math.min(width, height);
-  const size = m * 0.34, c = m * 0.2;
+  const { size, c } = markerGeom(width, height);
   [[c, c], [width - c, c], [width - c, height - c]].forEach(([x, y], corner) => drawTag(ctx, tagId(slot, corner), x, y, size));
 }
 
