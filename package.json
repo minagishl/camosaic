@@ -8,11 +8,14 @@
     "build:lib": "pnpm --filter camosaic build",
     "typecheck": "pnpm build:lib && pnpm -r typecheck",
     "test": "pnpm build:lib && pnpm -r test",
-    "test:e2e": "pnpm build:lib && pnpm --filter camosaic-web test:e2e"
+    "test:e2e": "pnpm build:lib && pnpm --filter camosaic-web test:e2e",
+    "deploy": "pnpm build && wrangler deploy",
+    "deploy:dry": "pnpm build && wrangler deploy --dry-run"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.166.0"
   }
 }

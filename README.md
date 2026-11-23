@@ -145,3 +145,15 @@ Algorithmic unit coverage and the package build are verified in this repository.
 ## Connecting a child
 
 Tabs of the same browser connect automatically. For another device, open `/host` and scan the QR code (or open the shared link, or type the six-character code on `/child`). Pairing uses PeerJS: by default the public PeerJS signaling server, or your own via `VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH` and `VITE_PEER_SECURE`. Only the WebRTC handshake goes through it; scene and pose data flow directly between devices.
+
+## Deploying to Cloudflare Workers
+
+The web app is served as static assets from a Cloudflare Worker (`wrangler.jsonc`, custom domain `camosaic.dev`, single-page-app fallback).
+
+```sh
+pnpm exec wrangler login   # once
+pnpm deploy                # builds the library and the app, then runs `wrangler deploy`
+pnpm deploy:dry            # build and validate the config without uploading
+```
+
+The `camosaic.dev` zone must be on the same Cloudflare account; `wrangler deploy` then creates the custom-domain record and certificate.
