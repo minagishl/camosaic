@@ -1,6 +1,6 @@
 {
   "name": "camosaic",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Camera-based shared canvas tracking for multiple physical screens",
   "license": "MIT",
   "repository": {
